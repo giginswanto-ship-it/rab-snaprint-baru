@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+/laravel_temp/vendor/
+/laravel_temp/node_modules/
+
+# Environment files
+.env
+.env.backup
+.env.production
+laravel_temp/.env
+
+# Logs and databases
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

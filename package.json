@@ -1,0 +1,19 @@
+{
+  "name": "rab-snaprint-digital-printing",
+  "version": "1.0.0",
+  "description": "Aplikasi Dinamis Rencana Anggaran Biaya (RAB) dan Perkiraan Modal Awal Terintegrasi - Snaprint Digital Printing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "snaprint",
+    "rab",
+    "capex",
+    "opex",
+    "modal-awal",
+    "bep-calculator"
+  ],
+  "author": "Snaprint Management",
+  "license": "ISC"
+}

@@ -1,0 +1,482 @@
+{
+  "_version": "1.0.0",
+  "_lastUpdated": "2026-10-16T07:05:00.000Z",
+  "_databaseFile": "data/database.json",
+  "meta": {
+    "documentNo": "RAB-SNP/2026/04-01",
+    "outletLocation": "Ruko Sentra Bisnis Utama (Target Outlet)",
+    "date": "16 Oktober 2026",
+    "projectStatus": "Persiapan Fisik",
+    "targetDuration": "4 Minggu",
+    "standardArea": "45 – 60 m²",
+    "machineModel": "Digital A3+ Color & Mesin Outdoor 3.2m",
+    "preparedBy": "Tim Proyek & Pengadaan Snaprint",
+    "checkedBy": "Finance & Operational Manager",
+    "approvedBy": "Direksi / Owner Snaprint Digital Printing",
+    "notes": "Anggaran mencakup seluruh investasi aset awal (CAPEX), perizinan, dan termin pencairan dana pembukaan cabang baru."
+  },
+  "categories": [
+    {
+      "id": "cat_1",
+      "code": "01",
+      "name": "Interior dan Furniture (Fit-Out Outlet)",
+      "color": "sky",
+      "items": [
+        {
+          "id": "item_1_1",
+          "code": "1.1",
+          "name": "Meja Front Counter Kasir & CS",
+          "spec": "Custom HPL finish, slot 2 PC, display glass kartu nama & brosur",
+          "vol": 1,
+          "sat": "Unit",
+          "price": 7500000,
+          "status": "pending",
+          "notes": "Desain ergonomis dengan backdrop logo Snaprint"
+        },
+        {
+          "id": "item_1_2",
+          "code": "1.2",
+          "name": "Meja Kerja Produksi & Finishing",
+          "spec": "Rangka besi hollow tebal + multiplek 18mm lapis HPL tahan gores & cutter",
+          "vol": 2,
+          "sat": "Unit",
+          "price": 2500000,
+          "status": "pending",
+          "notes": "Ukuran 240x120 cm per unit, dilengkapi cutting mat besar"
+        },
+        {
+          "id": "item_1_3",
+          "code": "1.3",
+          "name": "Partisi Ruang Mesin & Dinding",
+          "spec": "Gypsum board 9mm rangka hollow, kedap suara parsial + kaca viewing",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 6500000,
+          "status": "pending",
+          "notes": "Memisahkan area produksi bising dengan area customer front office"
+        },
+        {
+          "id": "item_1_4",
+          "code": "1.4",
+          "name": "Pengecatan Sesuai Brand Guide",
+          "spec": "Cat interior dinding kombinasi warna primer Snaprint (Cyan, Dark Slate, Pure White)",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 3200000,
+          "status": "pending",
+          "notes": "Termasuk plamir dan cat anti-jamur"
+        },
+        {
+          "id": "item_1_5",
+          "code": "1.5",
+          "name": "Rak Showcase & Display Sample",
+          "spec": "Ambalan rak kayu/besi untuk display kertas & merchandise sampel cetak",
+          "vol": 1,
+          "sat": "Set",
+          "price": 3500000,
+          "status": "pending",
+          "notes": "Spotlight LED untuk katalog sampel kertas premium"
+        },
+        {
+          "id": "item_1_6",
+          "code": "1.6",
+          "name": "Kursi Kerja & Bangku Tunggu",
+          "spec": "4 kursi hidrolik operator + 1 bangku tunggu 3 dudukan customer",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 2800000,
+          "status": "pending",
+          "notes": "Kursi ergonomis mesh jaring untuk kenyamanan kerja"
+        },
+        {
+          "id": "item_1_7",
+          "code": "1.7",
+          "name": "Tata Udara (Air Conditioner)",
+          "spec": "AC Split 1.5 PK (R. Mesin Suhu Stabil 20-22°C) + AC 1 PK (Front Office)",
+          "vol": 2,
+          "sat": "Unit",
+          "price": 4250000,
+          "status": "pending",
+          "notes": "Penting untuk menjaga kelembaban kertas dan stabilitas laser drum"
+        }
+      ]
+    },
+    {
+      "id": "cat_2",
+      "code": "02",
+      "name": "Equipment dan Inventori (Hardware & Mesin)",
+      "color": "blue",
+      "items": [
+        {
+          "id": "item_2_1",
+          "code": "2.1",
+          "name": "Mesin Digital Printing Laser A3+",
+          "spec": "Alokasi DP/Commitment Fee Mesin Produksi Laser Warna (Fuji Xerox/Konica Minolta/Canon)",
+          "vol": 1,
+          "sat": "Unit",
+          "price": 55000000,
+          "status": "pending",
+          "notes": "Skema KSO/Sewa Beli/DP Mesin dengan klik kontrak resmi"
+        },
+        {
+          "id": "item_2_2",
+          "code": "2.2",
+          "name": "Mesin Potong Kertas Elektrik",
+          "spec": "Digital Guillotine Paper Cutter 45–48 cm auto clamp & safety sensor infrared",
+          "vol": 1,
+          "sat": "Unit",
+          "price": 18500000,
+          "status": "pending",
+          "notes": "Kapasitas potong hingga ketebalan 1 rim (500 lembar)"
+        },
+        {
+          "id": "item_2_3",
+          "code": "2.3",
+          "name": "Mesin Roll Laminating Panas/Dingin",
+          "spec": "Lebar 36–45 cm dual roller temperature control & anti-curl system",
+          "vol": 1,
+          "sat": "Unit",
+          "price": 5500000,
+          "status": "pending",
+          "notes": "Mendukung roll BOPP Doff, Glossy, dan Hologram 30 micron"
+        },
+        {
+          "id": "item_2_4",
+          "code": "2.4",
+          "name": "Mesin Jilid Spiral Kawat & Plastik",
+          "spec": "Heavy duty dual pitch puncher & binding machine (Pitch 3:1 & 2:1)",
+          "vol": 1,
+          "sat": "Unit",
+          "price": 3800000,
+          "status": "pending",
+          "notes": "Untuk pembuatan kalender, notebook, agenda, dan laporan tahunan"
+        },
+        {
+          "id": "item_2_5",
+          "code": "2.5",
+          "name": "Komputer Desain & RIP Operator",
+          "spec": "Core i5/Ryzen 5, RAM 16GB, SSD 512GB, Monitor IPS 24 inch 99% sRGB",
+          "vol": 2,
+          "sat": "Set",
+          "price": 8500000,
+          "status": "pending",
+          "notes": "1 unit untuk kasir/customer service + 1 unit dedicated RIP Print Server"
+        },
+        {
+          "id": "item_2_6",
+          "code": "2.6",
+          "name": "Sistem Kasir & POS Hardware",
+          "spec": "Mini PC Kasir, Printer Thermal 80mm Auto-Cutter, Cash Drawer RJ11, Barcode Scanner 2D",
+          "vol": 1,
+          "sat": "Set",
+          "price": 5200000,
+          "status": "pending",
+          "notes": "Terintegrasi software kasir nota struk dan pencatatan kas harian"
+        },
+        {
+          "id": "item_2_7",
+          "code": "2.7",
+          "name": "Sistem Keamanan & Network",
+          "spec": "CCTV 4 Channel Full HD + Router Wi-Fi Mikrotik + Gigabit Switch 8 Port",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 4500000,
+          "status": "pending",
+          "notes": "Monitoring via HP 24 jam dan LAN gigabit stabil untuk transfer file besar"
+        },
+        {
+          "id": "item_2_8",
+          "code": "2.8",
+          "name": "Pembelian Mesin Outdoor 3,2 m",
+          "spec": "Mesin Digital Printing Outdoor Solvent Lebar 3.2 Meter (Printhead Industri Konica Minolta 512i / Starfire 1024), Heavy Duty Chassis, Speed 80–120 m²/jam, RIP Software PhotoPrint/MainTop, Triple Heating System (Front-Middle-Rear) & Automatic Take-Up Media Roller",
+          "vol": 1,
+          "sat": "Unit",
+          "price": 125000000,
+          "discount": 0,
+          "status": "pending",
+          "notes": "Pengadaan mesin cetak outdoor format besar 3.2m untuk spanduk, banner flexi frontlite/backlite, baliho, dan sticker outdoor (termasuk instalasi, training teknisi/operator, dan garansi resmi 1 tahun)"
+        }
+      ]
+    },
+    {
+      "id": "cat_3",
+      "code": "03",
+      "name": "Marketing Tools dan Stok Bahan Awal",
+      "color": "amber",
+      "items": [
+        {
+          "id": "item_3_1",
+          "code": "3.1",
+          "name": "Fascia Signboard & Neon Box",
+          "spec": "Neon Box LED Akrilik Outdoor 300x90 cm + Frame Samping Plat Galvanis & Tiang",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 8500000,
+          "status": "pending",
+          "notes": "Visibilitas tinggi malam hari, hemat daya LED Samsung"
+        },
+        {
+          "id": "item_3_2",
+          "code": "3.2",
+          "name": "Paket Promosi Grand Opening",
+          "spec": "Spanduk rentang, Standing Banner Roll Up, 2.000 Brosur Promo, Voucher Diskon",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 2500000,
+          "status": "pending",
+          "notes": "Kampanye promosi pembukaan 2 minggu awal"
+        },
+        {
+          "id": "item_3_3",
+          "code": "3.3",
+          "name": "Seragam & ID Card Staff",
+          "spec": "Polo Shirt Bordir Snaprint (4 personil @ 2 pcs) + Lanyard ID Card Magnetik",
+          "vol": 8,
+          "sat": "Stel",
+          "price": 150000,
+          "status": "pending",
+          "notes": "Standard operational penampilan staf profesional"
+        },
+        {
+          "id": "item_3_4",
+          "code": "3.4",
+          "name": "Stok Kertas & Media Cetak A3+",
+          "spec": "Art Paper 120/150g, Art Carton 210/260/310g, Sticker Cromo/Vinyl, HVS 80g, Fancy Textured",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 9000000,
+          "status": "pending",
+          "notes": "Buffer stok bahan baku kertas cetak untuk 3-4 minggu awal operasi"
+        },
+        {
+          "id": "item_3_5",
+          "code": "3.5",
+          "name": "Consumables & Packaging",
+          "spec": "Roll laminasi doff/glossy, spiral kawat no 3-8, paper bag Snaprint, lakban, plastik",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 3800000,
+          "status": "pending",
+          "notes": "Perlengkapan finishing dan kemasan hasil cetak customer"
+        }
+      ]
+    },
+    {
+      "id": "cat_4",
+      "code": "04",
+      "name": "Biaya Lisensi Brand, Perizinan & Legalitas",
+      "color": "emerald",
+      "items": [
+        {
+          "id": "item_4_1",
+          "code": "4.1",
+          "name": "NIB & KBLI Percetakan (OSS)",
+          "spec": "Nomor Induk Berusaha berbasis risiko via OSS RBA + sertifikat standar percetakan",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 1000000,
+          "discount": 0,
+          "status": "pending",
+          "notes": "Legalitas perizinan operasional resmi"
+        },
+        {
+          "id": "item_4_2",
+          "code": "4.2",
+          "name": "Pajak Reklame & Izin Banner",
+          "spec": "Retribusi pajak daerah papan nama billboard / neon box outdoor 1 tahun pertama",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 2500000,
+          "discount": 0,
+          "status": "pending",
+          "notes": "Izin dinas pendapatan daerah / BPBD setempat"
+        },
+        {
+          "id": "item_4_3",
+          "code": "4.3",
+          "name": "Retribusi & Izin Lingkungan",
+          "spec": "Koordinasi lingkungan sekitar, keamanan, persetujuan tetangga & iuran RT/RW",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 1500000,
+          "discount": 0,
+          "status": "pending",
+          "notes": "Kemitraan aman dan kondusif dengan lingkungan toko"
+        },
+        {
+          "id": "item_4_4",
+          "code": "4.4",
+          "name": "Lisensi Brand & Sistem Snaprint Digital Printing",
+          "spec": "Hak penggunaan merek Snaprint, Brand Guidelines, Standard Operating Procedure (SOP), Sistem POS Kasir Cloud, dan Pelatihan Operasional Staf",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 25000000,
+          "discount": 5000000,
+          "status": "pending",
+          "notes": "Paket lisensi kemitraan resmi Snaprint (potongan promo pembukaan cabang Rp 5.000.000)"
+        }
+      ]
+    },
+    {
+      "id": "cat_5",
+      "code": "05",
+      "name": "Pekerjaan Tambahan & Contingency",
+      "color": "purple",
+      "items": [
+        {
+          "id": "item_5_1",
+          "code": "5.1",
+          "name": "Tambah Daya Listrik PLN & Panel",
+          "spec": "Biaya pasang / tambah daya ke 7.700 VA / 11.000 VA + Box Panel MCB pembagi per mesin",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 4500000,
+          "status": "pending",
+          "notes": "Kebutuhan daya stabil mesin laser fuser heater & AC secara simultan"
+        },
+        {
+          "id": "item_5_2",
+          "code": "5.2",
+          "name": "Grounding Tembaga Mesin (< 2Ω)",
+          "spec": "Pemasangan rod tembaga murni 3-4 meter ke tanah, uji impedansi tanah < 2 Ohm",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 1800000,
+          "status": "pending",
+          "notes": "Syarat mutlak garansi mesin digital laser & proteksi papan sirkuit utama"
+        },
+        {
+          "id": "item_5_3",
+          "code": "5.3",
+          "name": "Dana Cadangan Renovasi (Contingency)",
+          "spec": "Dana proteksi biaya tak terduga (bocor atap ruko, fitting pipa AC, perbaikan sanitasi)",
+          "vol": 1,
+          "sat": "Paket",
+          "price": 4200000,
+          "status": "pending",
+          "notes": "Alokasi kontingensi 2-3% dari total capex proyek"
+        }
+      ]
+    }
+  ],
+  "cashFlowSchedule": [
+    {
+      "termin": "Termin I",
+      "week": "Minggu 1",
+      "focus": "DP Interior (50%), Tambah Daya PLN, Biaya Izin Reklame & NIB",
+      "sharePercent": 25,
+      "nominal": 46750000,
+      "status": "done",
+      "paymentDate": "2026-10-18",
+      "refNo": "TRX-SNP-T1-001",
+      "notes": "Pembayaran DP kontraktor interior & pendaftaran daya PLN"
+    },
+    {
+      "termin": "Termin II",
+      "week": "Minggu 2",
+      "focus": "Pelunasan Interior, DP Mesin Laser A3+, Beli Mesin Potong & PC Desain",
+      "sharePercent": 40,
+      "nominal": 74800000,
+      "status": "in_progress",
+      "paymentDate": "2026-10-25",
+      "refNo": "TRX-SNP-T2-002",
+      "notes": "Pencairan terbesar untuk unit mesin produksi utama dan finishing potong"
+    },
+    {
+      "termin": "Termin III",
+      "week": "Minggu 3",
+      "focus": "Pemasangan Neon Box, Mesin Finishing Pendukung, Pembelian Stok Bahan",
+      "sharePercent": 25,
+      "nominal": 46750000,
+      "status": "pending",
+      "paymentDate": "2026-11-01",
+      "refNo": "TRX-SNP-T3-003",
+      "notes": "Pemasangan signage luar ruko, mesin laminasi roll, jilid, stok kertas awal"
+    },
+    {
+      "termin": "Termin IV",
+      "week": "Minggu 4",
+      "focus": "Trial Cetak, Media Promosi Grand Opening, Kas Awal (Petty Cash Outlet)",
+      "sharePercent": 10,
+      "nominal": 18700000,
+      "status": "pending",
+      "paymentDate": "2026-11-08",
+      "refNo": "TRX-SNP-T4-004",
+      "notes": "Pengujian kalibrasi warna mesin, penyebaran flyer pembukaan dan kas laci kasir"
+    }
+  ],
+  "workingCapital": {
+    "runwayMonths": 3,
+    "rentPerYear": 42000000,
+    "rentPaymentMonths": 12,
+    "rentDeposit": 5000000,
+    "pettyCashBuffer": 15000000,
+    "marketingMonthly": 1500000,
+    "salaries": [
+      { "id": "sal_1", "position": "Front Officer / Kasir & CS", "count": 1, "salaryPerMonth": 2800000 },
+      { "id": "sal_2", "position": "Operator Desain Grafis & RIP Cetak", "count": 2, "salaryPerMonth": 3200000 },
+      { "id": "sal_3", "position": "Operator Finishing, Potong & Packaging", "count": 1, "salaryPerMonth": 2700000 }
+    ],
+    "utilities": [
+      { "id": "utl_1", "name": "Listrik Bisnis (PLN B2 7.700 VA)", "costPerMonth": 3200000 },
+      { "id": "utl_2", "name": "Internet Dedicated & Wi-Fi Customer", "costPerMonth": 550000 },
+      { "id": "utl_3", "name": "Air Bersih, Sampah & Keamanan Lingkungan", "costPerMonth": 450000 },
+      { "id": "utl_4", "name": "Pemeliharaan AC & Alat Operasional", "costPerMonth": 600000 }
+    ]
+  },
+  "simulation": {
+    "workDaysPerMonth": 26,
+    "dailyA3Prints": 450,
+    "a3SellPrice": 5000,
+    "a3HppCost": 2150,
+    "dailyOutdoorM2": 35,
+    "outdoorSellPrice": 22000,
+    "outdoorHppCost": 9500,
+    "monthlyOtherProductsSales": 12500000,
+    "otherProductsMarginPercent": 55,
+    "targetPaybackMonths": 18,
+    "activeScenario": "moderat",
+    "scenarios": {
+      "pesimis": {
+        "label": "Skenario Konservatif (Pesimis)",
+        "dailyA3Prints": 250,
+        "dailyOutdoorM2": 15,
+        "monthlyOtherProductsSales": 7000000
+      },
+      "moderat": {
+        "label": "Skenario Moderat (Target Normal)",
+        "dailyA3Prints": 450,
+        "dailyOutdoorM2": 35,
+        "monthlyOtherProductsSales": 12500000
+      },
+      "optimis": {
+        "label": "Skenario Optimis (High Demand / Peak)",
+        "dailyA3Prints": 750,
+        "dailyOutdoorM2": 70,
+        "monthlyOtherProductsSales": 22000000
+      }
+    }
+  },
+  "businessPlan": {
+    "title": "Business Plan & Prospektus Bisnis Snaprint Digital Printing",
+    "vision": "Menjadi sentra digital printing one-stop service terdepan dengan integrasi mesin laser presisi dan outdoor format besar 3.2m.",
+    "marketSegments": [
+      { "name": "B2B Korporasi & UMKM", "share": 40, "desc": "Brosur, kartu nama, kalender, company profile, sticker label kemasan produk." },
+      { "name": "Event Organizer & Agensi", "share": 30, "desc": "Spanduk banner 3.2m, backdrop panggung, standing roll-up, merchandise promo." },
+      { "name": "Institusi, Kampus & Sekolah", "share": 15, "desc": "Sertifikat, buku panduan, modul, laporan tahunan, ID card & lanyard panitia." },
+      { "name": "Retail & Walk-In Customer", "share": 15, "desc": "Cetak foto, dokumen instan, stiker custom satuan, jilid skripsi & tugas kuliah." }
+    ],
+    "valuePropositions": [
+      "Dual-Engine Superiority: Mesin Laser A3+ presisi & Mesin Outdoor 3.2m dalam satu atap.",
+      "Same-Day Express Service tanpa ketergantungan sub-kontrak pihak ketiga.",
+      "Standarisasi Profil Warna ICC untuk akurasi cetak konsisten di setiap media.",
+      "Layanan finishing terpadu: laminasi roll panas/dingin, pemotong elektrik, & jilid spiral kawat."
+    ]
+  },
+  "discount": {
+    "enabled": false,
+    "type": "nominal",
+    "value": 0,
+    "label": "Potongan Khusus Kemitraan / Negosiasi Vendor"
+  }
+}

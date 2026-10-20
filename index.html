@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snaprint Digital Printing - RAB & Perkiraan Modal Awal Terintegrasi</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            snaprint: {
+              navy: '#0f172a',
+              blue: '#0284c7',
+              cyan: '#06b6d4',
+              accent: '#10b981',
+              warning: '#f59e0b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- TOP HEADER & BRANDING BAR (Screen Only) -->
+  <header class="no-print bg-slate-900 text-white shadow-lg sticky top-0 z-40 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Brand & System Title -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 flex items-center justify-center text-white font-black text-xl shadow-md ring-2 ring-sky-400/30">
+            S
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-lg tracking-tight text-white">SNAPRINT</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30">Digital Printing</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Sistem Dinamis RAB Outlet & Perkiraan Modal Awal</p>
+          </div>
+        </div>
+
+        <!-- Live Database Status Badge -->
+        <div id="live-db-status-badge" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs shadow-inner cursor-pointer" onclick="AppState.openDatabaseInspector()" title="Klik untuk membuka Inspektur Database Live">
+          <span class="relative flex h-2.5 w-2.5">
+            <span id="live-db-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span id="live-db-dot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span class="font-mono text-[11px] font-semibold" id="live-db-status-text">LIVE: data/database.json</span>
+        </div>
+
+        <!-- Global Action Bar -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Tombol Simpan Perubahan Utama -->
+          <button id="btn-save-changes" onclick="AppState.handleManualSave()" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition-all active:scale-95 ring-1 ring-emerald-400/40" title="Simpan seluruh perubahan ke file database.json (Shortcut: Ctrl + S)">
+            <i class="fa-solid fa-floppy-disk text-xs"></i>
+            <span id="btn-save-text">Simpan Perubahan</span>
+          </button>
+
+          <button onclick="AppState.openDatabaseInspector()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 shadow-sm transition-colors" title="Lihat & Kelola Database Live">
+            <i class="fa-solid fa-database text-emerald-400"></i>
+            <span class="hidden md:inline">Database Live</span>
+          </button>
+
+          <button id="btn-trigger-print" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold shadow transition-colors">
+            <i class="fa-solid fa-print"></i>
+            <span class="hidden sm:inline">Cetak Dokumen Resmi</span>
+          </button>
+
+          <button id="btn-export-csv" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors" title="Export Excel / CSV">
+            <i class="fa-solid fa-file-excel text-emerald-400"></i>
+            <span class="hidden lg:inline">Export Excel</span>
+          </button>
+
+          <div class="relative group">
+            <button class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+            <div class="absolute right-0 mt-1 w-48 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 py-1 hidden group-hover:block z-50">
+              <button onclick="AppState.openDatabaseInspector()" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2 text-emerald-700 font-semibold">
+                <i class="fa-solid fa-database"></i> Inspektur Database
+              </button>
+              <button id="btn-export-json" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-download text-sky-600"></i> Unduh File JSON
+              </button>
+              <button id="btn-export-sql" onclick="AppState.downloadSqlFile()" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2 text-amber-700 font-semibold">
+                <i class="fa-solid fa-file-code text-amber-600"></i> Unduh File SQL (.sql)
+              </button>
+              <button id="btn-import-json" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-upload text-indigo-600"></i> Impor File JSON
+              </button>
+              <input type="file" id="file-input-json" accept=".json" class="hidden">
+              <div class="border-t border-slate-100 my-1"></div>
+              <button id="btn-reset-data" class="w-full text-left px-3 py-2 text-xs hover:bg-rose-50 text-rose-600 flex items-center gap-2">
+                <i class="fa-solid fa-rotate-left"></i> Reset ke Default PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Project Metadata Strip -->
+      <div class="py-2.5 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 text-[11px] text-slate-400">
+        <div>
+          <span class="text-slate-400 block">No. Dokumen:</span>
+          <span id="meta-doc-no" class="font-mono text-white font-semibold">-</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">Lokasi:</span>
+          <span id="meta-location" class="text-white font-semibold truncate block">-</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">Status:</span>
+          <span id="meta-status" class="inline-block px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold">-</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">Target Durasi:</span>
+          <span id="meta-duration" class="text-white font-semibold">-</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">Standar Area:</span>
+          <span id="meta-area" class="text-white font-semibold">-</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">Model Mesin Produksi:</span>
+          <span id="meta-machine" class="text-white font-semibold truncate block">-</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION TABS (Screen Only) -->
+  <nav class="no-print bg-white border-b border-slate-200 sticky top-16 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex space-x-1 sm:space-x-2 overflow-x-auto py-2 no-scrollbar">
+        <button data-tab="dashboard" class="nav-tab-btn flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap bg-sky-600 text-white shadow-md">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Dashboard Eksekutif</span>
+        </button>
+
+        <button data-tab="rab-capex" class="nav-tab-btn flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+          <i class="fa-solid fa-list-check"></i>
+          <span>RAB Investasi Fisik (CAPEX)</span>
+        </button>
+
+        <button data-tab="modal-awal" class="nav-tab-btn flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+          <i class="fa-solid fa-coins text-amber-500"></i>
+          <span>Perkiraan Modal Awal</span>
+        </button>
+
+        <button data-tab="cashflow-termin" class="nav-tab-btn flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+          <i class="fa-solid fa-calendar-check text-sky-500"></i>
+          <span>Termin Dana 4 Minggu</span>
+        </button>
+
+        <button data-tab="bep-simulasi" class="nav-tab-btn flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+          <i class="fa-solid fa-chart-line text-emerald-500"></i>
+          <span>Business Plan, BEP & Cashflow</span>
+        </button>
+
+        <button data-tab="dokumen-cetak" class="nav-tab-btn flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+          <i class="fa-solid fa-file-invoice text-indigo-500"></i>
+          <span>Dokumen Resmi Sesuai PDF</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 no-print">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: DASHBOARD EKSEKUTIF -->
+    <!-- ========================================== -->
+    <div id="tab-dashboard" class="tab-content space-y-6">
+      <!-- 4 Primary KPI Highlight Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: Total Modal Awal -->
+        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 shadow-lg border border-slate-700 relative overflow-hidden">
+          <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-sky-500/10 rounded-full blur-xl pointer-events-none"></div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs uppercase tracking-wider font-bold text-sky-400">Total Modal Awal Dibutuhkan</span>
+            <span class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-vault"></i>
+            </span>
+          </div>
+          <div id="dash-total-modal" class="text-2xl font-black font-mono tracking-tight text-white mb-1">
+            Rp 0
+          </div>
+          <div class="text-[11px] text-slate-400 flex items-center justify-between">
+            <span>CAPEX Fisik + Modal Kerja</span>
+            <span class="text-emerald-400 font-semibold">100% Siap</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Capex Investasi Fisik -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs uppercase tracking-wider font-bold text-slate-500">Investasi Aset (CAPEX)</span>
+            <span class="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-print"></i>
+            </span>
+          </div>
+          <div id="dash-capex-total" class="text-2xl font-black font-mono tracking-tight text-slate-900 mb-1">
+            Rp 187.000.000
+          </div>
+          <div class="text-[11px] text-slate-500 flex items-center justify-between">
+            <span>5 Kategori (21 Item Anggaran)</span>
+            <span class="text-sky-600 font-semibold">Fit-Out & Mesin</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Modal Kerja (Working Capital Buffer) -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs uppercase tracking-wider font-bold text-slate-500">Modal Kerja (3 Bulan)</span>
+            <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-shield-heart"></i>
+            </span>
+          </div>
+          <div id="dash-wc-total" class="text-2xl font-black font-mono tracking-tight text-emerald-600 mb-1">
+            Rp 0
+          </div>
+          <div class="text-[11px] text-slate-500 flex items-center justify-between">
+            <span>Sewa Ruko + Gaji + Utilitas</span>
+            <span class="text-emerald-600 font-semibold">Safety Runway</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Titik Impas (BEP) & Payback -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs uppercase tracking-wider font-bold text-slate-500">Estimasi Balik Modal</span>
+            <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </span>
+          </div>
+          <div id="dash-payback-period" class="text-2xl font-black font-mono tracking-tight text-emerald-600 mb-1">
+            14.5 Bulan
+          </div>
+          <div class="text-[11px] text-slate-500 flex items-center justify-between">
+            <span>BEP Min: <strong id="dash-bep-sheets" class="text-slate-800">185 lbr/hari</strong></span>
+            <span id="dash-monthly-net" class="text-emerald-600 font-bold">+Rp 20 Jt/bln</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Realization Progress Bar -->
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between text-xs mb-2">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-slate-900">Realisasi Pengadaan Aset & Anggaran (CAPEX):</span>
+            <span id="dash-realized-text" class="text-slate-500 font-medium">0% Terbayar</span>
+          </div>
+          <span class="text-xs font-semibold text-sky-600">Termin 4 Minggu</span>
+        </div>
+        <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+          <div id="dash-realized-progress" class="h-full bg-gradient-to-r from-sky-500 to-emerald-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Quick Ratio Banner: % Biaya vs % Hasil Bersih -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-5 shadow-lg border border-slate-700">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
+              <i class="fa-solid fa-chart-simple"></i> Efisiensi Operasional Bisnis
+            </div>
+            <h3 class="text-base font-extrabold text-white">Rasio Biaya Operasional vs Hasil Bersih (Laba Bersih)</h3>
+            <p class="text-xs text-slate-300">Struktur alokasi dari 100% total omset bulanan yang diperoleh sistem Snaprint</p>
+          </div>
+          <div class="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/10">
+            <div class="text-right">
+              <div class="text-[10px] text-slate-300 uppercase font-semibold">Omset Bulanan Proyeksi</div>
+              <div id="dash-omset-nominal" class="text-sm font-black text-amber-300">Rp 91.020.000</div>
+            </div>
+            <div class="h-8 w-px bg-white/20"></div>
+            <div>
+              <div class="text-[10px] text-slate-300 uppercase font-semibold">Hasil Bersih (Margin)</div>
+              <div id="dash-net-profit-pct-badge" class="text-sm font-black text-emerald-400">32,8% / bln</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stacked 100% Bar -->
+        <div class="space-y-2">
+          <div class="w-full h-4 bg-slate-800/80 rounded-full overflow-hidden flex p-0.5 border border-slate-700/60 shadow-inner">
+            <div id="dash-bar-hpp" class="bg-gradient-to-r from-amber-500 to-orange-500 h-full rounded-l-full transition-all duration-500 relative group cursor-pointer" style="width: 43.3%" title="HPP (Biaya Bahan Baku)"></div>
+            <div id="dash-bar-opex" class="bg-gradient-to-r from-rose-500 to-red-600 h-full transition-all duration-500 relative group cursor-pointer" style="width: 23.8%" title="OPEX (Beban Operasional Tetap)"></div>
+            <div id="dash-bar-net" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-r-full transition-all duration-500 relative group cursor-pointer" style="width: 32.8%" title="Hasil Bersih (Laba)"></div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+            <div class="flex items-center gap-2 bg-slate-800/60 p-2 rounded-lg border border-amber-500/30">
+              <span class="w-3 h-3 rounded-full bg-amber-500 flex-shrink-0"></span>
+              <div class="flex-1 truncate">
+                <div class="text-[10px] text-slate-400">HPP / Biaya Bahan (<span id="dash-hpp-pct">43,3%</span>)</div>
+                <div id="dash-hpp-nominal" class="font-bold text-amber-300 text-xs">Rp 39.425.000</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-800/60 p-2 rounded-lg border border-rose-500/30">
+              <span class="w-3 h-3 rounded-full bg-rose-500 flex-shrink-0"></span>
+              <div class="flex-1 truncate">
+                <div class="text-[10px] text-slate-400">OPEX / Beban Tetap (<span id="dash-opex-pct">23,8%</span>)</div>
+                <div id="dash-opex-nominal" class="font-bold text-rose-300 text-xs">Rp 21.700.000</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-800/60 p-2 rounded-lg border border-emerald-500/40">
+              <span class="w-3 h-3 rounded-full bg-emerald-400 flex-shrink-0 animate-pulse"></span>
+              <div class="flex-1 truncate">
+                <div class="text-[10px] text-emerald-300 font-semibold">HASIL BERSIH (<span id="dash-net-profit-pct">32,8%</span>)</div>
+                <div id="dash-net-profit-nominal" class="font-extrabold text-emerald-400 text-xs">Rp 29.895.000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between text-[11px] text-slate-400">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-info text-sky-400"></i>
+            <span>Total Beban Biaya Keseluruhan: <strong id="dash-cost-total-nominal" class="text-white">Rp 61.125.000</strong> (<strong id="dash-cost-total-pct" class="text-rose-400">67,2%</strong>)</span>
+          </div>
+          <div class="text-emerald-300 font-medium">
+            Tiap Rp 100.000 omset menghasilkan <strong id="dash-net-yield">Rp 32.800</strong> hasil bersih
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Visual Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Chart 1: Capex Category Breakdown -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col">
+          <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-sky-600"></i> Distribusi Anggaran CAPEX
+          </h3>
+          <p class="text-xs text-slate-500 mb-4">Porsi alokasi dana per kategori fit-out & mesin</p>
+          <div class="flex-1 min-h-[260px] relative">
+            <canvas id="chart-capex-donut"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Modal Awal Composition -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col">
+          <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+            <i class="fa-solid fa-wallet text-emerald-600"></i> Komposisi Modal Awal
+          </h3>
+          <p class="text-xs text-slate-500 mb-4">Perbandingan Belanja Aset Fisik vs Modal Kerja Cadangan</p>
+          <div class="flex-1 min-h-[260px] relative">
+            <canvas id="chart-modal-composition"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: 12-Month Pro-Forma Cashflow Projection -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col">
+          <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+            <i class="fa-solid fa-chart-line text-indigo-600"></i> Proyeksi Arus Kas & Impas
+          </h3>
+          <p class="text-xs text-slate-500 mb-4">Estimasi akumulasi laba bersih 12 bulan awal</p>
+          <div class="flex-1 min-h-[260px] relative">
+            <canvas id="chart-cumulative-cashflow"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: RENCANA ANGGARAN BIAYA (RAB CAPEX) -->
+    <!-- ========================================== -->
+    <div id="tab-rab-capex" class="tab-content hidden space-y-6">
+      <!-- Toolbar & Action Filter -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <!-- Search box -->
+          <div class="relative w-full sm:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <input type="text" id="rab-search-input" placeholder="Cari item atau spesifikasi..." class="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
+          </div>
+
+          <!-- Category filter -->
+          <select id="rab-category-filter" class="text-xs rounded-lg border border-slate-300 py-1.5 px-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="all">Semua Kategori (5)</option>
+            <option value="cat_1">01. Interior & Furniture</option>
+            <option value="cat_2">02. Hardware & Mesin</option>
+            <option value="cat_3">03. Marketing & Stok</option>
+            <option value="cat_4">04. Biaya Perizinan</option>
+            <option value="cat_5">05. Tambahan & Cadangan</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <button onclick="AppState.handleManualSave()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-sm transition-all active:scale-95" title="Simpan perubahan tabel RAB ke database">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+          </button>
+          <button id="btn-open-add-item" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors">
+            <i class="fa-solid fa-plus"></i> Tambah Item Baru
+          </button>
+        </div>
+      </div>
+
+      <!-- Kotak Manajemen Potongan & Diskon Kemitraan (Global Discount Panel) -->
+      <div class="bg-gradient-to-r from-emerald-900/10 via-slate-50 to-sky-50 border border-emerald-500/30 rounded-2xl p-4 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg border border-emerald-300 shrink-0">
+              <i class="fa-solid fa-tags"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-bold text-slate-900">Potongan / Diskon Khusus Kemitraan (Global Discount)</span>
+                <span id="rab-disc-badge-active" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">Aktif</span>
+              </div>
+              <p class="text-xs text-slate-500">Terapkan potongan promosi brand, voucher grand opening, atau diskon negosiasi vendor pada total CAPEX.</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <select id="rab-global-disc-type" class="text-xs rounded-lg border border-slate-300 py-2 px-2.5 bg-white font-medium focus:ring-emerald-500">
+              <option value="nominal">Potongan Rupiah (Rp)</option>
+              <option value="percent">Potongan Persen (%)</option>
+            </select>
+            <input type="number" id="rab-global-disc-val" min="0" placeholder="0" class="w-36 text-xs font-mono font-bold rounded-lg border border-slate-300 py-2 px-3 focus:ring-emerald-500">
+            <button type="button" onclick="AppState.applyGlobalDiscount()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow transition-colors active:scale-95">
+              Terapkan Disc
+            </button>
+            <button type="button" onclick="AppState.resetGlobalDiscount()" class="px-2.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition-colors" title="Hapus potongan global">
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Interactive RAB Table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-white text-xs font-semibold uppercase tracking-wider">
+                <th class="py-3 px-3 text-center w-12">No</th>
+                <th class="py-3 px-3">Item Pekerjaan & Spesifikasi Teknis</th>
+                <th class="py-3 px-3 text-center w-20">Volume</th>
+                <th class="py-3 px-3 text-right w-28">Harga Satuan (Rp)</th>
+                <th class="py-3 px-3 text-right w-28 text-emerald-400">Potongan / Disc</th>
+                <th class="py-3 px-3 text-right w-32">Subtotal Net (Rp)</th>
+                <th class="py-3 px-3 text-center w-28">Status Beli</th>
+                <th class="py-3 px-3 text-center w-20">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="rab-table-body" class="divide-y divide-slate-200">
+              <!-- Dynamically rendered via app.js -->
+            </tbody>
+            <tfoot>
+              <!-- Subtotal Kotor -->
+              <tr class="bg-slate-800 text-slate-300 font-semibold text-xs border-t border-slate-700">
+                <td colspan="5" class="py-2.5 px-4 text-right">Subtotal Anggaran Kotor (Sebelum Potongan):</td>
+                <td id="rab-gross-total" class="py-2.5 px-3 text-right font-mono text-slate-200">Rp 0</td>
+                <td colspan="2"></td>
+              </tr>
+              <!-- Total Potongan -->
+              <tr class="bg-emerald-950/20 text-emerald-700 font-semibold text-xs border-t border-slate-200">
+                <td colspan="5" class="py-2 px-4 text-right">
+                  <span class="inline-flex items-center gap-1.5 font-bold"><i class="fa-solid fa-tag"></i> Total Seluruh Potongan / Diskon:</span>
+                </td>
+                <td id="rab-disc-total" class="py-2 px-3 text-right font-mono text-emerald-600 font-bold">- Rp 0</td>
+                <td colspan="2" class="text-xs text-slate-500 pl-2" id="rab-disc-pct-label">(0%)</td>
+              </tr>
+              <!-- Grand Total Net -->
+              <tr class="bg-slate-900 text-white font-black text-sm border-t-2 border-emerald-500">
+                <td colspan="5" class="py-3.5 px-4 text-right text-emerald-400 uppercase tracking-wide">TOTAL ESTIMASI INVESTASI AWAL NET (CAPEX):</td>
+                <td id="rab-grand-total" class="py-3.5 px-3 text-right font-mono text-base text-white">Rp 187.000.000</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: PERKIRAAN MODAL AWAL & RUNWAY -->
+    <!-- ========================================== -->
+    <div id="tab-modal-awal" class="tab-content hidden space-y-6">
+      <!-- Penjelasan Konsep Modal Awal Snaprint -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="max-w-3xl">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-2">
+              <i class="fa-solid fa-coins"></i> Analisis Kelayakan Modal Awal
+            </div>
+            <h2 class="text-xl font-black text-slate-900">Perkiraan Modal Awal Snaprint Digital Printing</h2>
+            <p class="text-sm text-slate-600 mt-1 leading-relaxed">
+              Membuka outlet digital printing membutuhkan dua komponen modal utama: <strong>Investasi Aset Fisik (CAPEX)</strong> untuk renovasi & mesin, serta <strong>Modal Kerja Cadangan Operasional (Working Capital Runway)</strong> untuk menutupi beban sewa, gaji karyawan, dan utilitas hingga cash flow outlet mandiri (mencapai titik impas).
+            </p>
+          </div>
+          <div class="shrink-0">
+            <button onclick="AppState.handleManualSave()" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-sm transition-all active:scale-95" title="Simpan seluruh parameter modal awal ke database">
+              <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 Highlight Comparison Blocks -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
+            <div class="text-xs uppercase font-bold text-slate-500">1. Alokasi Belanja Aset (CAPEX)</div>
+            <div id="ma-capex-val" class="text-xl font-bold font-mono text-slate-900 mt-1">Rp 187.000.000</div>
+            <div id="ma-capex-pct" class="text-xs text-sky-600 font-semibold mt-1">63.5% dari Total Modal</div>
+            <p class="text-[11px] text-slate-500 mt-2">Mesin laser warna A3+, mesin potong elektrik, mesin finishing, komputer RIP & fit-out ruko.</p>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl p-4 bg-emerald-50/50">
+            <div class="text-xs uppercase font-bold text-slate-500">2. Modal Kerja Cadangan (OPEX)</div>
+            <div id="ma-wc-val" class="text-xl font-bold font-mono text-emerald-700 mt-1">Rp 0</div>
+            <div id="ma-wc-pct" class="text-xs text-emerald-600 font-semibold mt-1">36.5% dari Total Modal</div>
+            <p class="text-[11px] text-slate-500 mt-2">Sewa ruko dimuka, cadangan gaji 4 kru, listrik 7.700 VA, dan buffer kas darurat.</p>
+          </div>
+
+          <div class="border-2 border-emerald-500 rounded-xl p-4 bg-emerald-600 text-white shadow-md">
+            <div class="text-xs uppercase font-bold text-emerald-100">TOTAL MODAL AWAL DISIAPKAN</div>
+            <div id="ma-grand-val" class="text-2xl font-black font-mono mt-1">Rp 0</div>
+            <div class="text-xs text-emerald-100 font-medium mt-1">Estimasi Kesiapan Dana Komprehensif</div>
+            <p class="text-[11px] text-emerald-100/90 mt-2">Outlet siap beroperasi tanpa risiko kekurangan dana pada 3-6 bulan pertama.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings & Breakdown Inputs -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left: Configuration Form -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+          <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-sky-600"></i> Parameter Modal Kerja
+          </h3>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Durasi Runway Cadangan Operasional</label>
+            <select id="wc-runway-select" class="w-full text-xs rounded-lg border border-slate-300 py-2 px-3 focus:ring-sky-500 focus:border-sky-500">
+              <option value="1">1 Bulan Runway (Skema Minimal)</option>
+              <option value="3" selected>3 Bulan Runway (Rekomendasi Standar)</option>
+              <option value="6">6 Bulan Runway (Skema Aman Konservatif)</option>
+              <option value="12">12 Bulan Runway (Sangat Konservatif)</option>
+            </select>
+            <p class="text-[11px] text-slate-500 mt-1">Cadangan biaya gaji dan utilitas yang disimpan di muka.</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Sewa Tempat Ruko per Tahun (Rp)</label>
+            <input type="number" id="wc-rent-year" step="1000000" value="42000000" class="w-full text-xs font-mono rounded-lg border border-slate-300 py-2 px-3 focus:ring-sky-500 focus:border-sky-500">
+            <p class="text-[11px] text-slate-500 mt-1">Rata-rata Rp 3.500.000 / bulan (dibayar 1 tahun di muka).</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Cadangan Kas Darurat / Petty Cash (Rp)</label>
+            <input type="number" id="wc-petty-cash" step="1000000" value="15000000" class="w-full text-xs font-mono rounded-lg border border-slate-300 py-2 px-3 focus:ring-sky-500 focus:border-sky-500">
+            <p class="text-[11px] text-slate-500 mt-1">Untuk uang kembalian kasir, suku cadang dadakan, dan likuiditas.</p>
+          </div>
+
+          <!-- Scenario Comparison Cards -->
+          <div class="pt-3 border-t border-slate-100">
+            <span class="text-xs font-bold text-slate-800 block mb-2">Simulasi 3 Opsi Modal Awal:</span>
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
+                <div class="flex justify-between font-bold text-slate-800">
+                  <span>Skenario Minimal (1 Bln Runway)</span>
+                  <span id="sc-min-total" class="font-mono text-slate-900">-</span>
+                </div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Sewa 6 bulan + gaji 1 bln</div>
+              </div>
+              <div class="p-2.5 rounded-lg border-2 border-sky-400 bg-sky-50/50">
+                <div class="flex justify-between font-bold text-sky-900">
+                  <span>Skenario Moderat (Rekomendasi)</span>
+                  <span id="sc-mod-total" class="font-mono text-sky-900">-</span>
+                </div>
+                <div class="text-[10px] text-sky-700 mt-0.5">Sewa 1 thn + runway 3 bln + buffer 15jt</div>
+              </div>
+              <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
+                <div class="flex justify-between font-bold text-slate-800">
+                  <span>Skenario Konservatif (6 Bln Runway)</span>
+                  <span id="sc-safe-total" class="font-mono text-slate-900">-</span>
+                </div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Sewa 1 thn + runway 6 bln + buffer 25jt</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Staff & Utilities Tables -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Table Gaji Karyawan (Staff Roster) -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <h3 class="text-sm font-bold text-slate-900 mb-2 flex items-center justify-between">
+              <span class="flex items-center gap-2">
+                <i class="fa-solid fa-users text-sky-600"></i> Alokasi Gaji Staf Operasional (4 Personil)
+              </span>
+              <span class="text-xs text-slate-500 font-normal">Bisa disesuaikan</span>
+            </h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                    <th class="py-2 px-3">Posisi / Jabatan</th>
+                    <th class="py-2 px-3 text-center">Jumlah</th>
+                    <th class="py-2 px-3 text-right">Gaji / Orang / Bln</th>
+                    <th class="py-2 px-3 text-right">Total / Bulan</th>
+                    <th class="py-2 px-3 text-right bg-sky-50">Cadangan Runway</th>
+                  </tr>
+                </thead>
+                <tbody id="wc-salaries-table" class="divide-y divide-slate-100">
+                  <!-- Dynamically rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Table Biaya Utilitas Bulanan -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <h3 class="text-sm font-bold text-slate-900 mb-2 flex items-center justify-between">
+              <span class="flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-amber-500"></i> Biaya Utilitas & Pemeliharaan Bulanan
+              </span>
+              <span class="text-xs text-slate-500 font-normal">Listrik & Internet</span>
+            </h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                    <th class="py-2 px-3">Komponen Utilitas</th>
+                    <th class="py-2 px-3 text-right">Biaya / Bulan</th>
+                    <th class="py-2 px-3 text-right bg-sky-50">Cadangan Runway</th>
+                  </tr>
+                </thead>
+                <tbody id="wc-utilities-table" class="divide-y divide-slate-100">
+                  <!-- Dynamically rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: CASH FLOW TERMIN 4 MINGGU -->
+    <!-- ========================================== -->
+    <div id="tab-cashflow-termin" class="tab-content hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <div class="max-w-3xl mb-4">
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-sky-100 text-sky-800 text-xs font-bold mb-2">
+            <i class="fa-solid fa-calendar-days"></i> Termin Pencairan Dana (4 Minggu)
+          </div>
+          <h2 class="text-xl font-black text-slate-900">Jadwal Cash Flow Realisasi Pembukaan Outlet</h2>
+          <p class="text-sm text-slate-600 mt-1">
+            Pembayaran dan pengadaan dipecah menjadi 4 tahap (Termin I s/d IV) sesuai progres pengerjaan fisik, pembelian mesin, dan kesiapan operasional outlet. Nominal otomatis terkalkulasi secara proporsional terhadap Total CAPEX.
+          </p>
+        </div>
+
+        <!-- 4 Termin Cards -->
+        <div id="termin-schedule-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <!-- Rendered dynamically via app.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: SIMULATOR FINANSIAL & BEP -->
+    <!-- ========================================== -->
+    <div id="tab-bep-simulasi" class="tab-content hidden space-y-6">
+      <!-- Header & Scenario Toolbar -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+          <div class="max-w-3xl">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-2">
+              <i class="fa-solid fa-briefcase"></i> Business Plan & Financial Projections
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Business Plan, Proyeksi Cashflow & Target BEP Terintegrasi</h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              Rencana bisnis komprehensif, analisis unit economics dual-engine (Mesin Laser A3+ & Mesin Outdoor 3.2m), simulator target titik impas (BEP) yang dapat diubah secara dinamis, serta proyeksi arus kas multi-tahun berbasis modal awal aktual <strong class="text-slate-900">Rp 448.600.000</strong>.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <button onclick="AppState.handleManualSave()" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-sm transition-all active:scale-95" title="Simpan parameter simulasi ke database">
+              <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Scenario Switcher -->
+        <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-slate-100">
+          <span class="text-xs font-bold text-slate-700 mr-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders text-sky-600"></i> Preset Skenario Target:
+          </span>
+          <button id="btn-scenario-pesimis" onclick="AppState.applyScenarioPreset('pesimis')" class="scenario-btn px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-700 hover:bg-slate-100 transition-all">
+            <i class="fa-solid fa-cloud-sun text-amber-500 mr-1"></i> Konservatif (Pesimis)
+          </button>
+          <button id="btn-scenario-moderat" onclick="AppState.applyScenarioPreset('moderat')" class="scenario-btn px-3 py-1.5 rounded-lg text-xs font-bold border border-sky-600 bg-sky-50 text-sky-800 transition-all shadow-sm">
+            <i class="fa-solid fa-bullseye text-sky-600 mr-1"></i> Moderat (Target Utama)
+          </button>
+          <button id="btn-scenario-optimis" onclick="AppState.applyScenarioPreset('optimis')" class="scenario-btn px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-700 hover:bg-slate-100 transition-all">
+            <i class="fa-solid fa-rocket text-purple-600 mr-1"></i> Optimis (High Demand)
+          </button>
+        </div>
+      </div>
+
+      <!-- SECTION 1: RINGKASAN BUSINESS PLAN & MODEL BISNIS -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: Value Proposition -->
+        <div class="bg-gradient-to-br from-sky-900 to-slate-900 text-white p-5 rounded-2xl shadow-sm border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400">Value Proposition</span>
+              <span class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center text-sm">
+                <i class="fa-solid fa-gem"></i>
+              </span>
+            </div>
+            <h3 class="text-base font-bold text-white mb-2">Dual-Engine Powerhouse</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Integrasi mesin Laser A3+ presisi tinggi & mesin Outdoor 3.2m format besar dalam satu atap outlet. Layanan cetak same-day tanpa lempar vendor luar.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-sky-300 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-check"></i> Kontrol Kualitas 100% Mandiri
+          </div>
+        </div>
+
+        <!-- Card 2: Market Segmentation -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Segmentasi Pasar</span>
+              <span class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-sm">
+                <i class="fa-solid fa-users-rays"></i>
+              </span>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 mb-2">B2B, Event & Retail</h3>
+            <ul class="text-xs text-slate-600 space-y-1">
+              <li>• <strong>40% B2B / UMKM:</strong> Label, kemasan, brosur</li>
+              <li>• <strong>30% Event & Agensi:</strong> Spanduk 3.2m, baliho</li>
+              <li>• <strong>15% Kampus / Sekolah:</strong> Buku, sertifikat</li>
+              <li>• <strong>15% Retail:</strong> Cetak instan walk-in</li>
+            </ul>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-purple-700 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-chart-pie"></i> Diversifikasi Risiko Pendapatan
+          </div>
+        </div>
+
+        <!-- Card 3: Unit Economics Matrix -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Unit Economics</span>
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">
+                <i class="fa-solid fa-percent"></i>
+              </span>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 mb-2">Tingkat Margin Sehat</h3>
+            <div class="space-y-1.5 text-xs text-slate-700">
+              <div class="flex justify-between items-center">
+                <span>Laser A3+ (Rp 5.000):</span>
+                <span class="font-bold text-emerald-600 font-mono">57.0% (Rp 2.850)</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span>Outdoor 3.2m (Rp 22.000):</span>
+                <span class="font-bold text-emerald-600 font-mono">56.8% (Rp 12.500)</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span>Jasa Finishing / Lain:</span>
+                <span class="font-bold text-emerald-600 font-mono">55.0% Margin</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-emerald-700 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-trend-up"></i> Rata-rata Gross Margin: 56.7%
+          </div>
+        </div>
+
+        <!-- Card 4: Modal Structure -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Struktur Modal Awal</span>
+              <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm">
+                <i class="fa-solid fa-vault"></i>
+              </span>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 mb-2">Total: Rp 448.600.000</h3>
+            <div class="space-y-1.5 text-xs text-slate-600">
+              <div class="flex justify-between">
+                <span>Investasi CAPEX Net:</span>
+                <strong class="font-mono text-slate-900">Rp 332.000.000 (74%)</strong>
+              </div>
+              <div class="flex justify-between">
+                <span>Modal Kerja Runway 3 Bln:</span>
+                <strong class="font-mono text-slate-900">Rp 116.600.000 (26%)</strong>
+              </div>
+              <div class="flex justify-between">
+                <span>Beban Operasional / Bln:</span>
+                <strong class="font-mono text-rose-600">Rp 21.700.000</strong>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-amber-700 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-shield-halved"></i> Runway Kas 3 Bulan Aman
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: DUAL-ENGINE PARAMETER CONTROLS & DYNAMIC TARGET BEP -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left: Sliders & Parameter Controls (5 cols) -->
+        <div class="lg:col-span-5 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-sky-600"></i> Kontrol Asumsi & Target BEP
+            </h3>
+            <span class="text-[11px] text-slate-500">Dapat Diubah Kapan Saja</span>
+          </div>
+
+          <!-- LINI A: MESIN LASER A3+ -->
+          <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3 shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-sky-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-print text-sky-600"></i> 1. Mesin Laser Warna A3+
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-sky-100 text-sky-700 font-semibold">Produksi Brosur/Doc</span>
+            </div>
+
+            <!-- Daily A3 Prints Slider -->
+            <div>
+              <div class="flex justify-between text-xs font-semibold text-slate-800 mb-1">
+                <span>Target Cetak Harian:</span>
+                <span id="sim-daily-prints-val" class="text-sky-700 font-mono font-bold">450 lembar/hari</span>
+              </div>
+              <input type="range" id="sim-daily-prints" min="50" max="1500" step="10" value="450" class="w-full accent-sky-600 cursor-pointer">
+              <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                <span>50 lembar</span>
+                <span>Standar (450)</span>
+                <span>1.500 lembar</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-700 mb-1">Harga Jual / Lbr (Rp)</label>
+                <input type="number" id="sim-sell-price" step="250" value="5000" class="w-full text-xs font-mono rounded-lg border border-slate-300 py-1.5 px-2.5 focus:ring-1 focus:ring-sky-500">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-700 mb-1">HPP / Lbr (Kertas+Toner)</label>
+                <input type="number" id="sim-hpp-cost" step="50" value="2150" class="w-full text-xs font-mono rounded-lg border border-slate-300 py-1.5 px-2.5 focus:ring-1 focus:ring-sky-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- LINI B: MESIN CETAK OUTDOOR 3.2M -->
+          <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3 shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-scroll text-indigo-600"></i> 2. Mesin Outdoor 3.2m
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 font-semibold">Spanduk / Banner</span>
+            </div>
+
+            <!-- Daily Outdoor M2 Slider -->
+            <div>
+              <div class="flex justify-between text-xs font-semibold text-slate-800 mb-1">
+                <span>Target Cetak Harian:</span>
+                <span id="sim-daily-outdoor-val" class="text-indigo-700 font-mono font-bold">35 m²/hari</span>
+              </div>
+              <input type="range" id="sim-daily-outdoor" min="5" max="150" step="5" value="35" class="w-full accent-indigo-600 cursor-pointer">
+              <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                <span>5 m²</span>
+                <span>Standar (35 m²)</span>
+                <span>150 m²</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-700 mb-1">Harga Jual / m² (Rp)</label>
+                <input type="number" id="sim-outdoor-price" step="1000" value="22000" class="w-full text-xs font-mono rounded-lg border border-slate-300 py-1.5 px-2.5 focus:ring-1 focus:ring-indigo-500">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-700 mb-1">HPP / m² (Bahan+Tinta)</label>
+                <input type="number" id="sim-outdoor-hpp" step="250" value="9500" class="w-full text-xs font-mono rounded-lg border border-slate-300 py-1.5 px-2.5 focus:ring-1 focus:ring-indigo-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- LINI C: FINISHING, RETAIL & TARGET HORIZON -->
+          <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3 shadow-xs">
+            <span class="text-xs font-bold text-slate-900 block flex items-center gap-1.5">
+              <i class="fa-solid fa-layer-group text-amber-500"></i> 3. Finishing & Operasional Toko
+            </span>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-700 mb-1">Omset Produk Lain / Bln (Rp)</label>
+                <input type="number" id="sim-other-sales" step="1000000" value="12500000" class="w-full text-xs font-mono rounded-lg border border-slate-300 py-1.5 px-2.5 focus:ring-1 focus:ring-amber-500">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-700 mb-1">Margin Kotor (%)</label>
+                <input type="number" id="sim-other-margin" min="10" max="90" value="55" class="w-full text-xs font-mono rounded-lg border border-slate-300 py-1.5 px-2.5 focus:ring-1 focus:ring-amber-500">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-700 mb-1">Hari Kerja / Bulan</label>
+                <input type="number" id="sim-work-days" min="20" max="31" value="26" class="w-full text-xs font-mono rounded-lg border border-slate-300 py-1.5 px-2.5">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-700 mb-1">Target Balik Modal (BEP)</label>
+                <select id="sim-target-payback" class="w-full text-xs font-semibold rounded-lg border border-slate-300 py-1.5 px-2.5 bg-white text-slate-800 focus:ring-1 focus:ring-sky-500">
+                  <option value="12">Target 12 Bulan (1 Tahun)</option>
+                  <option value="18" selected>Target 18 Bulan (1.5 Tahun)</option>
+                  <option value="24">Target 24 Bulan (2 Tahun)</option>
+                  <option value="36">Target 36 Bulan (3 Tahun)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Live Results & Dynamic Target BEP (7 cols) -->
+        <div class="lg:col-span-7 space-y-4">
+          <!-- 5 Highlight Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div class="bg-slate-900 text-white p-3.5 rounded-xl border border-slate-800">
+              <div class="text-[10px] uppercase font-bold text-sky-400">Total Omset / Bln</div>
+              <div id="sim-out-total-rev" class="text-lg font-bold font-mono mt-1 text-white">Rp 0</div>
+              <div id="sim-out-gross-pct" class="text-[11px] text-sky-300 mt-1 font-semibold">0% Margin Kotor</div>
+            </div>
+
+            <div class="bg-rose-50 p-3.5 rounded-xl border border-rose-200">
+              <div class="text-[10px] uppercase font-bold text-rose-800">Total Biaya (% Biaya)</div>
+              <div id="sim-out-total-cost" class="text-lg font-bold font-mono text-rose-700 mt-1">Rp 0</div>
+              <div id="sim-out-cost-pct" class="text-[11px] text-rose-600 mt-1 font-semibold">0% Rasio Biaya</div>
+            </div>
+
+            <div class="bg-emerald-50 p-3.5 rounded-xl border border-emerald-200">
+              <div class="text-[10px] uppercase font-bold text-emerald-800">Hasil Bersih / Bln</div>
+              <div id="sim-out-net-profit" class="text-lg font-bold font-mono text-emerald-700 mt-1">Rp 0</div>
+              <div id="sim-out-net-pct" class="text-[11px] text-emerald-600 mt-1 font-semibold">0% Net Margin</div>
+            </div>
+
+            <div class="bg-amber-50 p-3.5 rounded-xl border border-amber-200">
+              <div class="text-[10px] uppercase font-bold text-amber-800">Balik Modal (Payback)</div>
+              <div id="sim-out-payback-total" class="text-lg font-bold font-mono text-amber-900 mt-1">0 Bulan</div>
+              <div id="sim-out-payback-capex" class="text-[11px] text-amber-700 mt-1 font-semibold">CAPEX: 0 Bulan</div>
+            </div>
+
+            <div class="bg-indigo-50 p-3.5 rounded-xl border border-indigo-200">
+              <div class="text-[10px] uppercase font-bold text-indigo-800">Return on Investment</div>
+              <div id="sim-out-roi" class="text-lg font-bold font-mono text-indigo-900 mt-1">0% / Thn</div>
+              <div id="sim-out-annual-profit" class="text-[11px] text-indigo-700 mt-1 font-semibold">Rp 0 / Thn</div>
+            </div>
+          </div>
+
+          <!-- PANEL ANALISIS STRUKTUR BIAYA & HASIL BERSIH -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                  <i class="fa-solid fa-chart-pie text-indigo-600"></i> Struktur Biaya Operasional & Hasil Bersih
+                </h4>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Proporsi alokasi dari 100% total omset bulanan (<span id="sim-breakdown-rev-text" class="font-bold text-slate-700">Rp 91.020.000</span>)
+                </p>
+              </div>
+              <span id="sim-breakdown-summary-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                Margin Bersih: 32,8%
+              </span>
+            </div>
+
+            <!-- Stacked Progress Bar -->
+            <div>
+              <div class="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden flex p-0.5 border border-slate-200 shadow-inner">
+                <div id="sim-breakdown-bar-hpp" class="bg-amber-500 h-full rounded-l-full transition-all duration-300" style="width: 43.3%" title="HPP / Biaya Bahan"></div>
+                <div id="sim-breakdown-bar-opex" class="bg-rose-500 h-full transition-all duration-300" style="width: 23.8%" title="OPEX / Beban Operasional Tetap"></div>
+                <div id="sim-breakdown-bar-net" class="bg-emerald-500 h-full rounded-r-full transition-all duration-300" style="width: 32.8%" title="Hasil Bersih (Net Profit)"></div>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1 px-1">
+                <span>0%</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> HPP (Bahan)</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span> OPEX (Tetap)</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Hasil Bersih</span>
+                <span>100%</span>
+              </div>
+            </div>
+
+            <!-- Breakdown Detail 4 Columns -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-200">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-bold text-amber-900">Biaya HPP (Bahan)</span>
+                  <span id="sim-breakdown-hpp-pct" class="text-xs font-black text-amber-700 bg-amber-200/60 px-1.5 py-0.5 rounded">43,3%</span>
+                </div>
+                <div id="sim-breakdown-hpp-nominal" class="text-base font-extrabold font-mono text-amber-900">Rp 39.425.000</div>
+                <div class="text-[10px] text-amber-700 mt-0.5">Tinta, toner, kertas A3+, banner outdoor</div>
+              </div>
+
+              <div class="p-3 rounded-xl bg-rose-50/70 border border-rose-200">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-bold text-rose-900">Beban OPEX (Tetap)</span>
+                  <span id="sim-breakdown-opex-pct" class="text-xs font-black text-rose-700 bg-rose-200/60 px-1.5 py-0.5 rounded">23,8%</span>
+                </div>
+                <div id="sim-breakdown-opex-nominal" class="text-base font-extrabold font-mono text-rose-900">Rp 21.700.000</div>
+                <div class="text-[10px] text-rose-700 mt-0.5">Gaji 4 staf, sewa ruko, listrik, internet</div>
+              </div>
+
+              <div class="p-3 rounded-xl bg-slate-100 border border-slate-300">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-bold text-slate-800">TOTAL BIAYA (% BIAYA)</span>
+                  <span id="sim-breakdown-total-cost-pct" class="text-xs font-black text-slate-900 bg-slate-300/70 px-1.5 py-0.5 rounded">67,2%</span>
+                </div>
+                <div id="sim-breakdown-total-cost-nominal" class="text-base font-extrabold font-mono text-slate-900">Rp 61.125.000</div>
+                <div class="text-[10px] text-slate-600 mt-0.5">Akumulasi seluruh beban bulanan</div>
+              </div>
+
+              <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-300 shadow-sm">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-bold text-emerald-900">HASIL BERSIH (LABA)</span>
+                  <span id="sim-breakdown-net-pct" class="text-xs font-black text-emerald-800 bg-emerald-200 px-1.5 py-0.5 rounded">32,8%</span>
+                </div>
+                <div id="sim-breakdown-net-nominal" class="text-base font-black font-mono text-emerald-700">Rp 29.895.000</div>
+                <div class="text-[10px] text-emerald-700 font-medium mt-0.5">Keuntungan bersih siap dividen / kas</div>
+              </div>
+            </div>
+
+            <!-- Insight Note -->
+            <div class="p-2.5 rounded-lg bg-sky-50 border border-sky-200 text-xs text-sky-900 flex items-center gap-2">
+              <i class="fa-solid fa-lightbulb text-sky-600 shrink-0"></i>
+              <span id="sim-breakdown-summary-text">
+                Dari setiap <strong>Rp 100.000</strong> penjualan, dialokasikan untuk biaya operasional <strong>Rp 67.200 (67,2%)</strong> dan menghasilkan laba bersih <strong>Rp 32.800 (32,8%)</strong>.
+              </span>
+            </div>
+          </div>
+
+          <!-- TARGET BEP ACHIEVEMENT STATUS CARD -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-flag-checkered text-emerald-600"></i> Evaluasi Ketercapaian Target BEP Balik Modal
+              </h4>
+              <span id="sim-target-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                Memenuhi Target
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div class="p-3 rounded-lg bg-slate-50 border border-slate-100">
+                <span class="text-slate-500 block">Laba Bersih Minimal yang Dibutuhkan:</span>
+                <span id="sim-target-required-profit" class="text-base font-bold font-mono text-slate-900 mt-0.5 block">Rp 0 / bulan</span>
+                <span class="text-[10px] text-slate-500">Agar modal Rp 448,6jt kembali dalam target horizon</span>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-50 border border-slate-100">
+                <span class="text-slate-500 block">Target Omset Minimal yang Harus Diraih:</span>
+                <span id="sim-target-required-rev" class="text-base font-bold font-mono text-slate-900 mt-0.5 block">Rp 0 / bulan</span>
+                <span class="text-[10px] text-slate-500">Penjualan minimum untuk mencapai laba target</span>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                <span>Rasio Ketercapaian Target Profit:</span>
+                <span id="sim-target-progress-text" class="text-emerald-700 font-bold">100%</span>
+              </div>
+              <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                <div id="sim-target-progress-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 100%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DUAL BREAK-EVEN POINT (OPERATIONAL BEP) BOX -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-crosshairs text-sky-600"></i> Titik Impas Operasional (Operational Break-Even Point)
+            </h4>
+            <p class="text-xs text-slate-500">
+              Ambang batas minimum volume penjualan untuk menutup seluruh beban tetap bulanan (gaji 4 staf, sewa, listrik, marketing) sebesar <strong class="text-slate-800 font-mono" id="sim-fixed-cost-display">Rp 21.700.000</strong>. Di atas titik ini, outlet langsung mencetak keuntungan bersih.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div class="p-3 rounded-xl bg-sky-50/70 border border-sky-100">
+                <span class="text-slate-500 block">BEP Omset Penjualan:</span>
+                <span id="sim-out-bep-rev" class="text-base font-bold font-mono text-sky-900 mt-0.5 block">Rp 0</span>
+                <span class="text-[10px] text-slate-500">Omset impas / bulan</span>
+              </div>
+              <div class="p-3 rounded-xl bg-sky-50/70 border border-sky-100">
+                <span class="text-slate-500 block">BEP Cetak Laser A3+:</span>
+                <span id="sim-out-bep-sheets" class="text-base font-bold font-mono text-sky-900 mt-0.5 block">0 lembar/hari</span>
+                <span class="text-[10px] text-slate-500">Target minimum staf A3+</span>
+              </div>
+              <div class="p-3 rounded-xl bg-indigo-50/70 border border-indigo-100">
+                <span class="text-slate-500 block">BEP Cetak Outdoor 3.2m:</span>
+                <span id="sim-out-bep-outdoor" class="text-base font-bold font-mono text-indigo-900 mt-0.5 block">0 m²/hari</span>
+                <span class="text-[10px] text-slate-500">Target minimum operator outdoor</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: LAPORAN PROYEKSI CASHFLOW 12 BULAN (PRO-FORMA STATEMENT) -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-money-bill-trend-up text-emerald-600"></i> Proyeksi Arus Kas Bulanan (12-Month Pro-Forma Cashflow)
+            </h3>
+            <p class="text-xs text-slate-500">
+              Simulasi arus kas riil dengan kurva penyerapan pasar (Ramp-up: Bulan 1 = 45%, Bulan 2 = 65%, Bulan 5+ = 100%). Menampilkan kas masuk, kas keluar, dan saldo kas akhir.
+            </p>
+          </div>
+          <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 text-slate-600 shrink-0">
+            Cadangan Awal: Rp 15.000.000
+          </span>
+        </div>
+
+        <div class="overflow-x-auto max-h-80 overflow-y-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead class="sticky top-0 bg-slate-100 z-10 text-[11px] text-slate-700 font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-2 px-2.5">Bulan</th>
+                <th class="py-2 px-2.5 text-right">Cetak A3+</th>
+                <th class="py-2 px-2.5 text-right">Outdoor 3.2m</th>
+                <th class="py-2 px-2.5 text-right bg-sky-50 text-sky-900 font-bold">Total Omset</th>
+                <th class="py-2 px-2.5 text-right text-rose-700">Total Biaya</th>
+                <th class="py-2 px-2.5 text-right text-rose-800 font-bold bg-rose-50/50">% Biaya</th>
+                <th class="py-2 px-2.5 text-right text-emerald-700 font-bold">Hasil Bersih</th>
+                <th class="py-2 px-2.5 text-right text-emerald-800 font-bold bg-emerald-50/50">% Bersih</th>
+                <th class="py-2 px-2.5 text-right">Saldo Kas Akhir</th>
+                <th class="py-2 px-2.5 text-right font-bold text-sky-900">Arus Kumulatif</th>
+              </tr>
+            </thead>
+            <tbody id="sim-projections-table-body" class="divide-y divide-slate-100">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SECTION 4: MULTI-YEAR FORECAST & CHARTS -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Multi-Year Forecast (4 cols) -->
+        <div class="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-calendar-check text-purple-600"></i> Proyeksi 3 Tahun Pertama
+            </h4>
+            <p class="text-[11px] text-slate-500 mb-3">Estimasi pertumbuhan tahunan (+15% Thn 2, +12% Thn 3)</p>
+
+            <div class="space-y-3">
+              <!-- Year 1 -->
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="flex justify-between items-center text-xs font-bold text-slate-800 mb-1">
+                  <span>Tahun 1 (Fase Peluncuran):</span>
+                  <span id="sim-my-y1-net" class="font-mono text-emerald-600">+Rp 0</span>
+                </div>
+                <div class="text-[11px] text-slate-500 flex justify-between">
+                  <span>Total Omset: <strong id="sim-my-y1-rev" class="text-slate-700 font-mono">Rp 0</strong></span>
+                  <span class="text-emerald-700 font-medium">Margin Bersih ~32%</span>
+                </div>
+              </div>
+
+              <!-- Year 2 -->
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="flex justify-between items-center text-xs font-bold text-slate-800 mb-1">
+                  <span>Tahun 2 (Fase Ekspansi):</span>
+                  <span id="sim-my-y2-net" class="font-mono text-emerald-600">+Rp 0</span>
+                </div>
+                <div class="text-[11px] text-slate-500 flex justify-between">
+                  <span>Total Omset: <strong id="sim-my-y2-rev" class="text-slate-700 font-mono">Rp 0</strong></span>
+                  <span class="text-emerald-700 font-medium">+15% Omset B2B</span>
+                </div>
+              </div>
+
+              <!-- Year 3 -->
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="flex justify-between items-center text-xs font-bold text-slate-800 mb-1">
+                  <span>Tahun 3 (Fase Maturitas):</span>
+                  <span id="sim-my-y3-net" class="font-mono text-emerald-600">+Rp 0</span>
+                </div>
+                <div class="text-[11px] text-slate-500 flex justify-between">
+                  <span>Total Omset: <strong id="sim-my-y3-rev" class="text-slate-700 font-mono">Rp 0</strong></span>
+                  <span class="text-emerald-700 font-medium">Optimal Cash Cow</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
+            <span class="text-[11px] uppercase font-bold text-emerald-800 block">Total Akumulasi Laba 3 Tahun:</span>
+            <span id="sim-my-3y-total-profit" class="text-lg font-black font-mono text-emerald-700 mt-0.5 block">Rp 0</span>
+            <span class="text-[10px] text-emerald-600">Investasi awal Rp 448,6jt kembali penuh + laba berganda</span>
+          </div>
+        </div>
+
+        <!-- 2 Visual Charts: BEP CVP & Cumulative Cashflow (8 cols) -->
+        <div class="lg:col-span-8 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-area text-sky-600"></i> Visualisasi Titik Impas (BEP) & Kurva Pemulihan Modal
+            </h4>
+            <span class="text-[11px] text-slate-400">Live Interactive Charts</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Chart 1: BEP CVP Chart -->
+            <div class="flex flex-col">
+              <span class="text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                <i class="fa-solid fa-scale-balanced text-sky-600"></i> Kurva BEP (Cost-Volume-Profit)
+              </span>
+              <p class="text-[10px] text-slate-500 mb-2">Titik temu garis pendapatan dengan total biaya</p>
+              <div class="h-56 relative">
+                <canvas id="chart-bep-cvp"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 2: Cumulative Cashflow Recovery -->
+            <div class="flex flex-col">
+              <span class="text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                <i class="fa-solid fa-arrow-trend-up text-emerald-600"></i> Pemulihan Modal 12 Bulan (Recovery)
+              </span>
+              <p class="text-[10px] text-slate-500 mb-2">Perjalanan kas dari -Modal Awal menuju profit</p>
+              <div class="h-56 relative">
+                <canvas id="chart-cumulative-cashflow-tab5"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 6: DOKUMEN & CETAK RESMI -->
+    <!-- ========================================== -->
+    <div id="tab-dokumen-cetak" class="tab-content hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Preview Dokumen Cetak Resmi Snaprint</h2>
+          <p class="text-xs text-slate-500">Format cetak disesuaikan persis dengan standar dokumen RAB resmi 2 halaman + halaman 3 perkiraan modal awal.</p>
+        </div>
+        <button onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg shadow transition-colors">
+          <i class="fa-solid fa-print"></i> Cetak / Simpan ke PDF Sekarang
+        </button>
+      </div>
+
+      <!-- Preview Container on Screen -->
+      <div class="bg-slate-300 p-4 sm:p-8 rounded-2xl overflow-x-auto flex justify-center">
+        <div id="print-document-content" class="w-full max-w-4xl">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- PRINT ONLY CONTAINER (Visible ONLY during window.print) -->
+  <div id="print-document-container" class="hidden">
+    <!-- Populated with exact layout for printer -->
+  </div>
+
+  <!-- ADD / EDIT ITEM MODAL DIALOG -->
+  <div id="item-modal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
+      <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+        <h3 id="item-modal-title" class="font-bold text-sm">Tambah Item Anggaran</h3>
+        <button onclick="AppState.closeItemModal()" class="text-slate-400 hover:text-white text-base">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="item-modal-form" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori Biaya</label>
+          <select id="modal-item-cat" required class="w-full text-xs rounded-lg border border-slate-300 py-2 px-3 focus:ring-sky-500 focus:border-sky-500">
+            <!-- options inserted by js -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Kode Item</label>
+            <input type="text" id="modal-item-code" placeholder="Misal: 1.8" class="w-full text-xs font-mono rounded-lg border border-slate-300 py-2 px-3">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Item Pekerjaan / Alat *</label>
+            <input type="text" id="modal-item-name" required placeholder="Nama item..." class="w-full text-xs rounded-lg border border-slate-300 py-2 px-3">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Spesifikasi / Detail Teknis</label>
+          <textarea id="modal-item-spec" rows="2" placeholder="Spesifikasi bahan, ukuran, merek..." class="w-full text-xs rounded-lg border border-slate-300 py-2 px-3"></textarea>
+        </div>
+
+        <div class="grid grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Volume *</label>
+            <input type="number" step="any" min="0.1" id="modal-item-vol" required value="1" class="w-full text-xs font-mono rounded-lg border border-slate-300 py-2 px-3">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Satuan *</label>
+            <input type="text" id="modal-item-sat" required value="Unit" placeholder="Unit, Paket, Set..." class="w-full text-xs rounded-lg border border-slate-300 py-2 px-3">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Harga Satuan (Rp) *</label>
+            <input type="number" step="1000" min="0" id="modal-item-price" required class="w-full text-xs font-mono rounded-lg border border-slate-300 py-2 px-3">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-emerald-700 mb-1">Potongan / Disc (Rp)</label>
+            <input type="number" step="1000" min="0" id="modal-item-disc" value="0" placeholder="0" class="w-full text-xs font-mono font-bold rounded-lg border border-emerald-300 bg-emerald-50/40 py-2 px-3 text-emerald-800 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Status Pengadaan</label>
+            <select id="modal-item-status" class="w-full text-xs rounded-lg border border-slate-300 py-2 px-3">
+              <option value="pending">Menunggu</option>
+              <option value="in_progress">Proses DP (50%)</option>
+              <option value="purchased">Lunas / Terpasang</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan Tambahan</label>
+            <input type="text" id="modal-item-notes" placeholder="Catatan vendor / garansi..." class="w-full text-xs rounded-lg border border-slate-300 py-2 px-3">
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+          <button type="button" onclick="AppState.closeItemModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">
+            Batal
+          </button>
+          <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 rounded-lg shadow">
+            Simpan Item
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DATABASE INSPECTOR MODAL DIALOG -->
+  <div id="database-inspector-modal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150 flex flex-col max-h-[90vh]">
+      <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-database"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Inspektur Live Database</h3>
+            <p class="text-[11px] text-slate-400 font-mono">File: data/database.json</p>
+          </div>
+        </div>
+        <button onclick="AppState.closeDatabaseInspector()" class="text-slate-400 hover:text-white text-base">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <!-- Live Connection Status Strip -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="font-bold text-slate-800" id="db-inspector-status">Status: Live Synchronized</span>
+          </div>
+          <div class="text-slate-500 text-[11px] font-mono" id="db-inspector-last-update">
+            Terakhir Diperbarui: -
+          </div>
+        </div>
+
+        <!-- Format View Switcher Tabs -->
+        <div class="flex items-center gap-2 border-b border-slate-200 pb-2.5">
+          <button type="button" id="inspector-tab-btn-json" onclick="AppState.switchInspectorTab('json')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white shadow-sm flex items-center gap-1.5 transition-all">
+            <i class="fa-solid fa-code text-sky-400"></i> JSON Database (Live)
+          </button>
+          <button type="button" id="inspector-tab-btn-sql" onclick="AppState.switchInspectorTab('sql')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 transition-all">
+            <i class="fa-solid fa-database text-amber-500"></i> SQL Relasional (MySQL / MariaDB)
+          </button>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label id="db-inspector-label" class="text-xs font-bold text-slate-700">Isi Database JSON (Dapat Diedit Langsung):</label>
+            <div class="flex items-center gap-2">
+              <button type="button" id="db-inspector-copy-btn" onclick="AppState.copyInspectorContent()" class="text-[11px] px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-copy"></i> Salin
+              </button>
+              <button type="button" id="db-inspector-format-btn" onclick="AppState.formatInspectorJson()" class="text-[11px] px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-align-left"></i> Rapikan JSON
+              </button>
+            </div>
+          </div>
+          <textarea id="db-inspector-textarea" rows="14" class="w-full text-xs font-mono p-3 rounded-xl border border-slate-300 bg-slate-900 text-emerald-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"></textarea>
+          <p id="db-inspector-hint" class="text-[11px] text-slate-500 mt-1">Setiap kali Anda menekan tombol "Simpan ke Database", file <code>data/database.json</code> dan skrip <code>database.sql</code> di disk akan diperbarui otomatis secara real-time.</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="AppState.downloadDatabaseFile()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-semibold">
+            <i class="fa-solid fa-download"></i> Unduh .json
+          </button>
+          <button type="button" onclick="AppState.downloadSqlFile()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-semibold">
+            <i class="fa-solid fa-file-code text-amber-600"></i> Unduh .sql
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="AppState.closeDatabaseInspector()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-lg">
+            Tutup
+          </button>
+          <button type="button" id="db-inspector-save-btn" onclick="AppState.saveDatabaseFromInspector()" class="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan ke Database
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- JAVASCRIPT MODULES & EMBEDDED DATABASE -->
+  <script src="data/database.js"></script>
+  <script src="js/sql_generator.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/calculations.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
